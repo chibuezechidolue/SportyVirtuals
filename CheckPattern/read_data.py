@@ -67,7 +67,7 @@
 #                 print(f"{league_id}: failed")
 
 
-with open("../ScrapeData/data.txt", "r") as file:
+with open("../ScrapeData/month3.txt", "r") as file:
     txt_file = file.readlines()
 
 for line in txt_file:
