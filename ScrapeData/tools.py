@@ -29,7 +29,7 @@ def set_up_driver_instance():
     chrome_options.add_experimental_option('useAutomationExtension', False)
 
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
 
     # to stop printing error messages to the console
     chrome_options.add_argument('--log-level=3')
@@ -75,68 +75,68 @@ def set_up_driver_instance():
 
 def get_teams_scores(browser, full_results_history: dict) -> dict:
     events = browser.find_elements(
-        By.CSS_SELECTOR, '[class="eventBlock ng-star-inserted"]')
+        By.CSS_SELECTOR, '[class="history-container ng-star-inserted"]')
     # print("events: ", len(events))
-    events[0].click()
-    # full_results_history = {}
+    full_results_history = {}
     for event in events:
-        heading = event.find_element(
-            By.CSS_SELECTOR, '[class="row col-xs-12 history__event-day"]')
+        week = event.find_element(
+            By.CSS_SELECTOR, '[class="event-block-id ng-star-inserted"]').text
         date = event.find_element(
-            By.CSS_SELECTOR, '[class="row col-xs-12 history__event-time"]')
-        league_id = heading.find_element(By.CSS_SELECTOR, 'span').text
-        week = heading.text[len(league_id)+1:]
-        if not league_id in full_results_history:
+            By.CSS_SELECTOR, '[class="event-block-date"]').text
+        # league_id = heading.find_element(By.CSS_SELECTOR, 'span').text
+        if week == "Week 1":
             if full_results_history != {}:
                 print_both(full_results_history)
                 # print_both(f"\n{date.text}\n\n")
                 print_both(f"{date.text}\n")
             full_results_history = {}
-            full_results_history[league_id] = {}
-            print(league_id)
-        full_results_history[league_id][week] = {}
+            print("new league")
+        full_results_history[week] = {}
+        # event.click()
+        week_result = event.find_element(
+            By.CSS_SELECTOR, '[class="panel-body"]')
+        matches_in_week_result = week_result.find_elements(
+            By.CSS_SELECTOR, '[class="ng-star-inserted"]')
+        for match in matches_in_week_result:
+            match.click()
+            h_team = match.find_element(
+                By.CSS_SELECTOR, '[class="teamA flex-col"]').text
+            a_team = match.find_element(
+                By.CSS_SELECTOR, '[class="teamA flex-col"]').text
+            score = match.find_element(
+                By.CSS_SELECTOR, '[class="flex-col match-result-score p-1"').text
 
-        event.click()
-        week_results = event.find_elements(
-            By.CSS_SELECTOR, '.collapsable')
-        for week_result in week_results:
-            # week_scores = week_result.find_elements(
-            #     By.CSS_SELECTOR, '[class="grid grid-middle title-center ng-star-inserted"]')
-            matches_in_week_result = week_result.find_elements(
-                By.CSS_SELECTOR, '[class="event ng-star-inserted"]')
-            for match in matches_in_week_result:
-                match.click()
-                h2h_score = match.find_element(
-                    By.CSS_SELECTOR, '[class="grid grid-middle title-center ng-star-inserted"]')
-                h2h_score = h2h_score.text
-                h_team, a_team = h2h_score[:3], h2h_score[-3:]
-                score = h2h_score[3:-3].strip()
-                won_content = match.find_element(
-                    By.CSS_SELECTOR, '[class="col-xs-12 content"]')
+            print(h_team, a_team, score)
+            break
 
-                # To find the won outcome based on rows and colunmn a specific won outcome is located
-                rows = won_content.find_elements(
-                    By.CSS_SELECTOR, '[class="row ng-star-inserted"]')
-                cs_ht_ft_row = rows[1]
-                cols = cs_ht_ft_row.find_elements(
-                    By.CSS_SELECTOR, '[class="col-xs-4 ng-star-inserted"]')
+            # ht_ft
 
-                cs_col = cols[0]
-                cs = cs_col.find_element(
-                    By.CSS_SELECTOR, '[class="odd-market text--uppercase"]').text.strip()
-                cs_odd = cs_col.find_element(
-                    By.CSS_SELECTOR, '[class="grid grid-middle grid-center odd ng-star-inserted"]').text.strip()
+            # won_content = match.find_element(
+            #     By.CSS_SELECTOR, '[class="col-xs-12 content"]')
 
-                ht_ft_col = cols[1]
-                ht_ft = ht_ft_col.find_element(
-                    By.CSS_SELECTOR, '[class="odd-market text--uppercase"]').text.strip()
-                ht_ft_odd = ht_ft_col.find_element(
-                    By.CSS_SELECTOR, '[class="grid grid-middle grid-center odd ng-star-inserted"]').text.strip()
+            # # To find the won outcome based on rows and colunmn a specific won outcome is located
+            # rows = won_content.find_elements(
+            #     By.CSS_SELECTOR, '[class="row ng-star-inserted"]')
+            # cs_ht_ft_row = rows[1]
+            # cols = cs_ht_ft_row.find_elements(
+            #     By.CSS_SELECTOR, '[class="col-xs-4 ng-star-inserted"]')
 
-                full_results_history[league_id][week][f"{h_team} - {a_team}"] = {
-                    "correct_score": [cs, cs_odd], "ht/ft": [ht_ft, ht_ft_odd]}
+            # cs_col = cols[0]
+            # cs = cs_col.find_element(
+            #     By.CSS_SELECTOR, '[class="odd-market text--uppercase"]').text.strip()
+            # cs_odd = cs_col.find_element(
+            #     By.CSS_SELECTOR, '[class="grid grid-middle grid-center odd ng-star-inserted"]').text.strip()
 
-                match.click()
+            # ht_ft_col = cols[1]
+            # ht_ft = ht_ft_col.find_element(
+            #     By.CSS_SELECTOR, '[class="odd-market text--uppercase"]').text.strip()
+            # ht_ft_odd = ht_ft_col.find_element(
+            #     By.CSS_SELECTOR, '[class="grid grid-middle grid-center odd ng-star-inserted"]').text.strip()
+
+            full_results_history[week][f"{h_team} - {a_team}"] = {
+                "correct_score": [cs, cs_odd], "ht/ft": [ht_ft, ht_ft_odd]}
+
+            match.click()
             # for score in week_scores:
             #     h2h_score = score.text
             #     h_team, a_team = h2h_score[:3], h2h_score[-3:]
