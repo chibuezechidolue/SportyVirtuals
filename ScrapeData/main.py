@@ -41,8 +41,8 @@ def run_data_collection():
     print("I am done!!!")
 
 
-run_data_collection()
-djhhj
+# run_data_collection()
+# djhhj
 if __name__ == "__main__":
     while True:
         if os.environ.get("OPERATING_SYSTEM") == "windows":

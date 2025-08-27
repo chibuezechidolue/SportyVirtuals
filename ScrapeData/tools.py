@@ -179,7 +179,7 @@ def get_teams_scores(browser, current_n, full_results_history: dict) -> dict:
 
 def print_both(*args):
     """To print on the terminal as well as an output file"""
-    with open("data_dv.txt", "at") as file:
+    with open("data/data_dv.txt", "at") as file:
         to_print = " ".join([str(arg) for arg in args])
         # print(to_print)
         print(to_print, file=file)
@@ -290,7 +290,7 @@ def get_last_league_date():
     from datetime import datetime
     import calendar
 
-    with open("data_dv.txt", "r") as file:
+    with open("data/data_dv.txt", "r") as file:
         txt_file = file.readlines()
     date_time = txt_file[-2].strip().split()
     date, time_24h = date_time[0], date_time[1]

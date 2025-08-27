@@ -60,11 +60,6 @@ class ScrapeHistoryData:
             )
             load_more_btn.click()
             time.sleep(5)
-            # scroll using keyboard
-            # body = self.browser.find_element(By.TAG_NAME, "body")
-            # body.send_keys(Keys.PAGE_DOWN)  # Scroll down
-            # body.send_keys(Keys.PAGE_UP)  # Scroll up
-            # time.sleep(1)
 
-        print_both(full_results_history)
-        print_both(f"\nlast date checked: {date}\n")
+        # print_both(full_results_history)
+        # print_both(f"{date}\n")
