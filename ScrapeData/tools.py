@@ -179,7 +179,7 @@ def get_teams_scores(browser, current_n, full_results_history: dict) -> dict:
 
 def print_both(*args):
     """To print on the terminal as well as an output file"""
-    with open("data/data_dv.txt", "at") as file:
+    with open("data/data_dv_sam.txt", "at") as file:
         to_print = " ".join([str(arg) for arg in args])
         # print(to_print)
         print(to_print, file=file)
@@ -195,7 +195,9 @@ def filter_history(browser, filter_date: str, filter_time: str):
     if filter_date != None:
         # filter function
         # Set the begining date for filter
+        print(filter_date)
         filter_date = filter_date.split("/")
+        print(filter_date)
         month_to_search = calendar.month_name[int(filter_date[1])]
         day_to_search = filter_date[0]
         prev_month = browser.find_element(
@@ -267,18 +269,57 @@ def filter_history(browser, filter_date: str, filter_time: str):
         )
 
         filter_btn.click()
-        time.sleep(7)
+        time.sleep(10)
 
         first_result_date = browser.find_element(
             By.CSS_SELECTOR, '[class="event-block-date"]'
         ).text
         first_result_time = first_result_date.split()[1]
         print(first_result_time, filter_time)
-        if first_result_time != filter_time:
-            h_decrease_btn = time_input_h.find_element(
-                By.CSS_SELECTOR, '[class="pi pi-chevron-down"]'
-            ).click()
 
+    ##comment out from this liner
+    if first_result_time != filter_time:
+        h_decrease_btn = time_input_h.find_element(
+            By.CSS_SELECTOR, '[class="pi pi-chevron-down"]'
+        ).click()
+        print("i decreased the hour")
+        filter_btn = browser.find_element(
+            By.CSS_SELECTOR,
+            '[class="btn btn-lg btn-block search-calendar"]',
+        ).click()
+        time.sleep(7)
+        first_result_date = browser.find_element(
+            By.CSS_SELECTOR, '[class="event-block-date"]'
+        ).text
+        first_result_time = first_result_date.split()[1]
+        print(first_result_time, filter_time)
+    if first_result_time != filter_time:
+        h_increase_btn = time_input_h.find_element(
+            By.CSS_SELECTOR, '[class="pi pi-chevron-up"]'
+        )
+        h_increase_btn.click()
+        h_increase_btn.click()
+        print("i increased the hour")
+        filter_btn = browser.find_element(
+            By.CSS_SELECTOR,
+            '[class="btn btn-lg btn-block search-calendar"]',
+        ).click()
+        time.sleep(7)
+
+        # if the date still does not match, reduce the day in the calender by 1
+        first_result_date = browser.find_element(
+            By.CSS_SELECTOR, '[class="event-block-date"]'
+        ).text
+        first_result_time = first_result_date.split()[1]
+        if first_result_time != filter_time:
+            available_days = browser.find_elements(By.CSS_SELECTOR, ".ui-state-default")
+            for day in available_days:
+                if int(day.text.strip()) == int(day_to_search) - 1:
+                    day.click()
+                    break
+            #     m_increase_btn = time_input_m.find_element(
+            #         By.CSS_SELECTOR, '[class="pi pi-chevron-up"]'
+            #     ).click()
             filter_btn = browser.find_element(
                 By.CSS_SELECTOR,
                 '[class="btn btn-lg btn-block search-calendar"]',
@@ -290,7 +331,7 @@ def get_last_league_date():
     from datetime import datetime
     import calendar
 
-    with open("data/data_dv.txt", "r") as file:
+    with open("data/data_dv_sam.txt", "r") as file:
         txt_file = file.readlines()
     date_time = txt_file[-2].strip().split()
     date, time_24h = date_time[0], date_time[1]

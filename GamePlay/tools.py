@@ -24,8 +24,8 @@ def set_up_driver_instance():
     user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
     # user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'
 
-    chrome_options = webdriver.ChromeOptions()  # Google Chrome
-    # chrome_options = webdriver.EdgeOptions()      # Microsoft Edge
+    # chrome_options = webdriver.ChromeOptions()  # Google Chrome
+    chrome_options = webdriver.EdgeOptions()  # Microsoft Edge
     chrome_options.add_argument(f"user-agent={user_agent}")
     chrome_options.add_argument("--ignore-certificate-errors")
     chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -91,32 +91,31 @@ def set_up_driver_instance():
     # driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
     # driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.53 Safari/537.36'})
     # print(driver.execute_script("return navigator.userAgent;"))
-    return webdriver.Chrome(options=chrome_options)  # Google Chrome
-    # return webdriver.Edge(options=chrome_options)       # Microsoft Edge
+    # return webdriver.Chrome(options=chrome_options)  # Google Chrome
+    return webdriver.Edge(options=chrome_options)  # Microsoft Edge
 
 
-def get_team_scores(
-    browser,
-):
-    events = browser.find_elements(
-        By.CSS_SELECTOR, '[class="history-container ng-star-inserted"]'
-    )
+def get_team_scores(browser, weeks_to_check: int):
     current_result = {}
-    for event in events:
-        week = event.find_element(
-            By.CSS_SELECTOR, '[class="event-block-id ng-star-inserted"]'
-        ).text
-        # date = event.find_element(By.CSS_SELECTOR, '[class="event-block-date"]').text
-        print(week)
-        # if week == "Week 34":
-        #     pass
-        current_result[week] = {}
-        week_result = event.find_element(By.CSS_SELECTOR, '[class="panel-body"]')
+    weeks_to_check = weeks_to_check // 5 if weeks_to_check // 5 > 1 else 1
+    for n in range(weeks_to_check):
+        events = browser.find_elements(
+            By.CSS_SELECTOR, '[class="history-container ng-star-inserted"]'
+        )[n * 5 :]
+        print("events", len(events))
+        for event in events:
+            week = event.find_element(
+                By.CSS_SELECTOR, '[class="event-block-id ng-star-inserted"]'
+            ).text
+            print(week)
+            # if week == "Week 34":
+            #     pass
+            current_result[week] = {}
+            week_result = event.find_element(By.CSS_SELECTOR, '[class="panel-body"]')
 
-        for n in range(4):
             matches_in_week_result = week_result.find_elements(
                 By.CSS_SELECTOR, '[class="ng-star-inserted"]'
-            )[n * 5 :]
+            )
             for match in matches_in_week_result:
                 h_team = match.find_element(
                     By.CSS_SELECTOR, '[class="teamA flex-col"]'
@@ -128,7 +127,7 @@ def get_team_scores(
                 try:
                     match.click()
                 except ElementClickInterceptedException:
-                    print("An ElementClickInterceptedException occured")
+                    # print("An ElementClickInterceptedException occured")
                     browser.execute_script(
                         'arguments[0].scrollIntoView({block: "center", inline: "center"});',
                         match,
@@ -150,7 +149,7 @@ def get_team_scores(
                             By.XPATH, "following-sibling::*[1]"
                         )
                         ht_ft_outcome = next_sibiling.text.split(":")
-                        ht_ft = (ht_ft_outcome[0].strip(),)
+                        ht_ft = ht_ft_outcome[0].strip()
                     elif outcome.text.strip() == "CORRECT SCORE":
                         next_sibiling = outcome.find_element(
                             By.XPATH, "following-sibling::*[1]"
@@ -160,21 +159,62 @@ def get_team_scores(
                         break
 
                 current_result[week][f"{h_team} - {a_team}"] = {
-                    "correct_score": [cs],
-                    "ht/ft": [ht_ft],
+                    "correct_score": cs,
+                    "ht/ft": ht_ft,
                 }
 
                 match.click()
 
-                load_more_btn = browser.find_element(
-                    By.CSS_SELECTOR,
-                    '[class="btn-load-more-tickets btn btn-lg btn-block ng-star-inserted"]',
-                )
-                load_more_btn.click()
-                time.sleep(5)
+            if weeks_to_check == 1:
+                break
+
+        load_more_btn = browser.find_element(
+            By.CSS_SELECTOR,
+            '[class="btn-load-more-tickets btn btn-lg btn-block ng-star-inserted"]',
+        )
+        load_more_btn.click()
+        time.sleep(5)
 
     return current_result
 
+
+def find_week_to_play(week, available_weeks):
+    week_to_play = None
+    for event in available_weeks:
+        week_no = event.find_element(
+            By.CSS_SELECTOR, '[class="event-id ml-1 mr-1 ng-star-inserted"]'
+        ).text
+        if week_no == week:
+            week_to_play = event
+            return week_to_play
+    return available_weeks[
+        0
+    ]  # temp, only for testing purpose. comment out this line line later
+
+
+def clear_betslip(browser):
+    clear_betslip_btn = browser.find_element(
+        By.CSS_SELECTOR, '[class="clear ng-star-inserted"]'
+    )
+    clear_betslip_btn.click()
+
+def reduce_week_selected(week_selected: str, by: int, league: str) -> str:
+    """To reduce the week which the staking options has been selected while waiting for last staked result"""
+    if league == "bundliga":
+        last_week = "34"
+    else:
+        last_week = "38"
+    var_list = week_selected.split(" ")  # To split the string(Week_selected)
+    num = str(
+        int(var_list[1]) - by
+    )  # Convert number part to int, then reduce by(-by), then covert back to str()
+    if len(num) == 1 and num == "0":
+        output = (
+            var_list[0] + " " + last_week
+        )  # To change the output back to 34(which is the last week for bundesliga) Since week 1 - by = 0
+    else:
+        output = var_list[0] + " " + num
+    return output
 
 def print_both(*args):
     """To print on the terminal as well as an output file"""

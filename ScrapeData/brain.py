@@ -32,6 +32,7 @@ class ScrapeHistoryData:
         result_league_menu = self.browser.find_element(
             By.CSS_SELECTOR, '[class="menu"]'
         )
+        time.sleep(20)
         available_leagues = result_league_menu.find_elements(By.TAG_NAME, "div")
         for league_btn in available_leagues:
             try:
@@ -59,7 +60,7 @@ class ScrapeHistoryData:
                 '[class="btn-load-more-tickets btn btn-lg btn-block ng-star-inserted"]',
             )
             load_more_btn.click()
-            time.sleep(5)
+            time.sleep(10)
 
         # print_both(full_results_history)
         # print_both(f"{date}\n")
