@@ -30,8 +30,8 @@ for line in txt_file:
                     h_score = outcome["correct_score"][0][0]
                     a_score = outcome["correct_score"][0][-1]
                     # print(h_score, a_score)
-                    if outcome["ht/ft"][0][:2] == "X/":
-                        # if int(h_score) + int(a_score) > 3:
+                    # if outcome["ht/ft"][0][:2] == "X/":
+                    if int(h_score) + int(a_score) > 0:
                         # if int(h_score) < 1 or int(a_score) < 1:
                         # won = True
                         a[league_id][week][count] = "won"
@@ -45,7 +45,7 @@ for line in txt_file:
                 if list(a[league_id][week].values()).count("won") == 9:
                     won = True
                     week_won = week
-                    # break
+                    break
             if won:
                 with open("read_data_output.txt", "at") as file:
                     print(f"{league_id}: won | {week_won}", file=file)
