@@ -277,7 +277,7 @@ def filter_history(browser, filter_date: str, filter_time: str):
         first_result_time = first_result_date.split()[1]
         print(first_result_time, filter_time)
 
-    ##comment out from this liner
+    ##comment out from this line
     if first_result_time != filter_time:
         h_decrease_btn = time_input_h.find_element(
             By.CSS_SELECTOR, '[class="pi pi-chevron-down"]'
