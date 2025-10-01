@@ -1,7 +1,7 @@
-with open("new_a.txt", "r") as file:
+with open("../month9.txt", "r") as file:
     txt_file = file.readlines()
 
-count = 3540
+count = 2708
 for line in txt_file:
     if line != "\n":
         output = line
