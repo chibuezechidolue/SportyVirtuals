@@ -1,10 +1,13 @@
-
 import time
 from selenium.webdriver.common.by import By
 from tools import set_up_driver_instance, get_last_league_date, MyCustomThread
 from brain import ScrapeHistoryData
 from datetime import datetime
+from dotenv import load_dotenv
 import os
+
+
+load_dotenv()
 
 
 def run_data_collection():
@@ -54,4 +57,4 @@ if __name__ == "__main__":
         if bot.error:
             print(bot.error)
         # bot.terminate()
-        print('bot terminated')
+        print("bot terminated")
